@@ -1,15 +1,44 @@
-### Usage
+##Screen Capturing with Peepingtom
 
-1. Install the pre-requisites.
+Solving the problem of managing large quantities of web servers discovered by Nmap scans.
 
-    - cURL
-    - PhantomJS:
-        - Compile PhantomJS and place the binary in the same directory as the PeepingTom source files.
-        - Make sure the binary is named "phantomjs".
+The traditional approach is to open up each of the servers in a browser to see what’s there, then make a decision on which servers to attack, if any. This is highly inefficient, and in the case of a time constrained penetration test, not practical.
 
-2. Run the script.
+Peepingtom will quickly organize your nmap results with screenshots of each server page so you can quickly scan through and see which servers look best for exploitation.
 
-    - `python ./peepingtom.py -h`
+
+##STEPS:
+
+First you will need to put the banner-plus.nse file inside your scripts folder for nmap (/usr/share/nmap/scripts/).
+
+The peepingtom folder will be located inside the /opt directory.
+
+Using nmap, you will output your results to the /opt/peepingtom/ directory using a file name that suites your report.
+(e.g. /opt/peepingtom/report<IP CIDR> )
+
+Example:
+nmap --script /usr/share/nmap/scripts/banner-plus.nse --min-rate=400 --min-parallelism=256 -p 1-65535 -n -Pn -PS -oA /opt/peepingtom/report<IP CIDR>
+
+*Switch List*
+--script = location of banner-plus.nse script
+--min-rates = guarantee that scan will be finished by time (secs)
+--min-parallelism = speed up total number of probes
+-p = ports to scan
+-n = disable DNS resolution (speeds up scan)
+-Pn = disable ping (speeds up scan)
+-PS = TCP SYN Ping
+-oA = export in the three major formats at once
+
+Before kicking off peepingtom we need to prep & clean the data for scraping. Gnmap.pl is a perl script that will take the results and clean it to a list of IP addresses.
+
+Example:
+cd /opt/peepingtom
+
+cat report.gnmap | ./gnmap.pl | grep http | cut -f 1,2 -d "," | tr "," ":" > http_ips.txt
+
+python ./peepingtom.py -p -i http_ips.txt
+
+A new folder will be created and named based on a date timestamp in the peepingtom folder. Open report.html in a browser.
 
 ### Notes
 
@@ -17,46 +46,3 @@
 - Pages which use JavaScript to redirect the browser will show up as a blank screen shot in the report and the standard `200 OK` response headers will be displayed.
 - The TCP timeout can be adjusted within the setTimeout method call inside `capture.js`.
 
-### Changelog
-
-01.03.14
-
-- migrated from optparse to argparse.
-
-12.13.13
-
-- fixed the indefinite timeout bug in the cURL command.
-
-11.07.13
-
-- added the ability to store and view the source code of each target.
-- changed the cURL command to avoid using HEAD requests.
-
-08.09.13
-
-- added the ability to import Nmap files.
-- changed the "-n" argument to "-x" for XML input mode.
-
-07.03.13
-
-- removed PyQt4 support.
-- completely reorganized and optimized the codebase.
-- passed input requirements to PhantomJS. Input is now limited only to what PhantomJS allows (see Notes).
-- added the ability to import Nessus files.
-- added the ability to screenshot local files.
-- added full header infromation for all redirects and the final destination.
-- added clickable images for full size viewing.
-- added dynamic resizing of the html report.
-- added an option for setting the socket timeout.
-- modified reporting to group and sort results based on hash values of screenshot images.
-
-11.26.12
-
-- cleaned up the code for release.
-
-07.15.12
-
-- no longer freezes on redirects to 401 authentication.
-- stores each run in a unique directory.
-- shows headers for final destination rather than redirect.
-- denotes redirect next to the status header.
