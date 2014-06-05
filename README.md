@@ -19,14 +19,22 @@ Using nmap, you will output your results to the /opt/peepingtom/ directory using
 Example:
 nmap --script /usr/share/nmap/scripts/banner-plus.nse --min-rate=400 --min-parallelism=256 -p 1-65535 -n -Pn -PS -oA /opt/peepingtom/report<IP CIDR>
 
-*Switch List*
+--Switch List--
+
 --script = location of banner-plus.nse script
+
 --min-rates = guarantee that scan will be finished by time (secs)
+
 --min-parallelism = speed up total number of probes
+
 -p = ports to scan
+
 -n = disable DNS resolution (speeds up scan)
+
 -Pn = disable ping (speeds up scan)
+
 -PS = TCP SYN Ping
+
 -oA = export in the three major formats at once
 
 Before kicking off peepingtom we need to prep & clean the data for scraping. Gnmap.pl is a perl script that will take the results and clean it to a list of IP addresses.
